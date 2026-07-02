@@ -1,0 +1,141 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@400;500;600&display=swap');
+
+.footer {
+  --gold: #c9a35a;
+  --sand: #e8dcc2;
+  --muted: rgba(232, 220, 194, 0.72);
+  --ink-2: #141311;
+  --line: rgba(201, 163, 90, 0.25);
+  border-top: 1px solid var(--line);
+  background: #1b1a16;
+
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  color: var(--sand);
+  font-family: 'Jost', sans-serif;
+}
+
+.foot-links a {
+  position: relative;
+  z-index: 1;
+}
+
+.wrap {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
+.foot {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 40px;
+  padding: 56px 0 30px;
+  align-items: center;
+}
+
+.news h3 {
+  margin: 0 0 12px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.6rem, 2.5vw, 2rem);
+  font-weight: 500;
+  color: var(--sand);
+  line-height: 1.2;
+}
+
+.news p {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0 0 18px;
+  line-height: 1.6;
+  max-width: 36ch;
+}
+
+.news-form {
+  display: flex;
+  align-items: stretch;
+  max-width: 420px;
+  border: 1px solid var(--line);
+}
+
+.news input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--sand);
+  font-family: 'Jost', sans-serif;
+  padding: 13px 14px;
+  font-size: 13px;
+  min-width: 0;
+}
+
+.news input::placeholder {
+  color: rgba(232, 220, 194, 0.45);
+}
+
+.news-form button {
+  background: var(--gold);
+  border: none;
+  color: var(--ink-2);
+  font-family: 'Jost', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 13px 22px;
+  cursor: pointer;
+  transition: background 0.35s ease, color 0.35s ease;
+  flex-shrink: 0;
+}
+
+.news-form button:hover {
+  background: #d4b06a;
+}
+
+.foot-links {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: right;
+}
+
+.foot-links a {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.25s ease;
+}
+
+.foot-links a:hover {
+  color: var(--sand);
+}
+
+.copyright {
+  text-align: center;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  padding: 22px 0 30px;
+  border-top: 1px solid var(--line);
+}
+
+@media (max-width: 768px) {
+  .foot {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding: 40px 0 24px;
+  }
+
+  .foot-links {
+    text-align: left;
+  }
+
+  .news-form {
+    max-width: 100%;
+  }
+}

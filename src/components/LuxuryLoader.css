@@ -1,0 +1,193 @@
+.luxury-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background-color: #1a1a1a;
+  color: #c8a75a;
+}
+
+.luxury-loader__bg {
+  display: none;
+}
+
+.luxury-loader__border {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  line-height: 0;
+}
+
+.luxury-loader__border--top {
+  top: 0;
+  height: calc(100vw * 108 / 1920);
+}
+
+.luxury-loader__border--bottom {
+  bottom: 0;
+  height: calc(100vw * 115 / 1920);
+}
+
+.luxury-loader__pattern {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.luxury-loader__border--bottom .luxury-loader__pattern {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+.luxury-loader--reveal {
+  pointer-events: none;
+  animation: loaderFadeAway 1s ease 1.1s forwards;
+}
+
+.luxury-loader__brand {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: clamp(10px, 1.6vh, 18px);
+  font-family: 'Cormorant Garamond', serif;
+  text-align: center;
+  transform: translateY(-1vh);
+}
+
+.luxury-loader--reveal .luxury-loader__brand {
+  animation: logoFadeOut 0.65s ease forwards;
+}
+
+.luxury-loader__logo-wrap {
+  position: relative;
+  overflow: hidden;
+  height: clamp(18rem, 50vw, 36rem);
+  max-width: 96vw;
+  margin-bottom: clamp(-70px, -7vh, -24px);
+}
+
+.luxury-loader__logo-wrap::after {
+  content: '';
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  top: -30%;
+  height: 160%;
+  background: linear-gradient(
+    to top,
+    rgba(26, 26, 26, 0) 0%,
+    #1a1a1a 18%,
+    #1a1a1a 100%
+  );
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  animation: logoCurtain 2.4s cubic-bezier(0.5, 0, 0.2, 1) forwards;
+}
+
+.luxury-loader__logo {
+  display: block;
+  height: 100%;
+  width: auto;
+  max-width: 96vw;
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+.luxury-loader__brand p {
+  margin: clamp(-44px, -3.5vh, -12px) 0 0;
+  color: rgba(200, 167, 90, 0.5);
+  font-size: clamp(1.35rem, 2.9vw, 2rem);
+  letter-spacing: 0.02em;
+  animation: textFade 2.4s ease-in-out 0.4s infinite;
+  opacity: 0;
+}
+
+.luxury-loader__key {
+  display: block;
+  width: clamp(5.75rem, 11vw, 8.5rem);
+  height: auto;
+  margin-top: clamp(8px, 1.8vh, 20px);
+  object-fit: contain;
+  transform: translateY(0);
+  animation: textFade 2.4s ease-in-out 0.8s infinite;
+  opacity: 0;
+}
+
+@keyframes logoCurtain {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, -135%, 0);
+  }
+}
+
+@keyframes textFade {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes logoFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes loaderFadeAway {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@media (max-width: 640px) {
+  .luxury-loader__border {
+    display: none;
+  }
+
+  .luxury-loader__bg {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .luxury-loader__brand {
+    gap: 14px;
+  }
+
+  .luxury-loader__brand p {
+    font-size: clamp(0.95rem, 3.6vw, 1.15rem);
+    letter-spacing: 0.32em;
+  }
+}
