@@ -27,6 +27,10 @@ supabase/.temp/
 tmp_key_color.py
 *.zip
 
+# Unused public assets
+public/Ralph Laurenn.webm
+public/fashion-sale-banner-design-template-free-vector.jpg
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
