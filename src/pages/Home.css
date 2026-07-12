@@ -654,25 +654,6 @@
   flex-wrap: nowrap;
   overflow-x: auto;
   scroll-behavior: smooth;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(201, 163, 90, 0.35) transparent;
-}
-
-.best-sellers__grid::-webkit-scrollbar {
-  height: 6px;
-}
-
-.best-sellers__grid::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.best-sellers__grid::-webkit-scrollbar-thumb {
-  background-color: rgba(201, 163, 90, 0.35);
-  border-radius: 3px;
-}
-
-.best-sellers__grid::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(201, 163, 90, 0.55);
 }
 
 .product-card {

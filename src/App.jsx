@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
@@ -15,6 +15,7 @@ import { AuthProvider } from './context/AuthContext';
 import AnimatedBackground from './components/AnimatedBackground';
 import LuxuryLoader from './components/LuxuryLoader';
 import ScrollToTop from './components/ScrollToTop';
+import { prefetchProducts } from './services/api';
 import './App.css';
 
 const LOADER_SESSION_KEY = 'tawy-loader-seen';
@@ -28,6 +29,10 @@ function App() {
   const handleLoaderComplete = useCallback(() => {
     sessionStorage.setItem(LOADER_SESSION_KEY, 'true');
     setShowLoader(false);
+  }, []);
+
+  useEffect(() => {
+    prefetchProducts();
   }, []);
 
   return (

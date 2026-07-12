@@ -154,6 +154,12 @@ export const sameProductList = (left, right) => (
 
 export const getLocalProducts = () => getSeedProducts();
 
+export const prefetchProducts = () => loadAllProducts();
+
+export const getCachedProducts = (filters = {}) => (
+  allProductsCache ? applyProductFilters(allProductsCache, filters) : null
+);
+
 export const api = {
   async getProducts(filters = {}) {
     let products;

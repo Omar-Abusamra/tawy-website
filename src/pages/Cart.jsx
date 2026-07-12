@@ -108,8 +108,10 @@ const Cart = () => {
                   onClick={() => handleRemoveItem(item)}
                   className="remove-item-btn"
                   disabled={isRemoving}
+                  aria-label={`Remove ${item.name} from cart`}
                 >
-                  Remove
+                  <span className="remove-item-btn__label">Remove</span>
+                  <span className="remove-item-btn__icon" aria-hidden="true">&times;</span>
                 </button>
               </div>
             </div>

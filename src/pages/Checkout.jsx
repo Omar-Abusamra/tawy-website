@@ -2,7 +2,12 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContextValue';
 import { submitCashOnDeliveryOrder } from '../services/orders';
-import { getCartBagBlockReason } from '../utils/bagProduct';
+import BagPromptModal from '../components/BagPromptModal';
+import {
+  cartHasRegularProduct,
+  getCartBagBlockReason,
+  isBagProduct,
+} from '../utils/bagProduct';
 import './Checkout.css';
 
 const initialCustomer = {
@@ -33,10 +38,18 @@ const Checkout = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState('');
   const [orderReference, setOrderReference] = useState('');
+  const [bagPromptSkipped, setBagPromptSkipped] = useState(false);
 
   const total = getCartTotal();
   const itemCount = items.reduce((count, item) => count + item.quantity, 0);
   const cartBagBlockReason = getCartBagBlockReason(items);
+  const hasBagInCart = items.some(isBagProduct);
+  const shouldShowBagPrompt = (
+    !hasBagInCart &&
+    cartHasRegularProduct(items) &&
+    !bagPromptSkipped &&
+    !orderReference
+  );
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -128,6 +141,13 @@ const Checkout = () => {
 
   return (
     <main className="checkout">
+      {shouldShowBagPrompt && (
+        <BagPromptModal
+          onClose={() => setBagPromptSkipped(true)}
+          onSkip={() => setBagPromptSkipped(true)}
+        />
+      )}
+
       <section className="checkout__header">
         <span className="checkout__eyebrow">Cash on Delivery</span>
         <h1>Checkout</h1>
