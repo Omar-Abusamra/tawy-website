@@ -1,17 +1,18 @@
 import { getEffectivePrice } from './pricing';
 
-const PIXEL_ID = import.meta.env.VITE_META_PIXEL_ID;
-const CURRENCY = 'EGP';
+const PIXEL_IDS = (import.meta.env.VITE_META_PIXEL_ID || '')
+  .split(',')
+  .map((id) => id.trim())
+  .filter(Boolean);
 
-export const isMetaPixelConfigured = () => Boolean(PIXEL_ID);
+const CURRENCY = 'EGP';
+const FBEVENTS_SRC = 'https://connect.facebook.net/en_US/fbevents.js';
+
+export const isMetaPixelConfigured = () => PIXEL_IDS.length > 0;
 
 const getFbq = () => (typeof window !== 'undefined' ? window.fbq : null);
 
 const getProductValue = (product) => getEffectivePrice(product);
-
-const getLineItemValue = (item) => (
-  Number(item?.price || 0) * Number(item?.quantity || 1)
-);
 
 const getContentId = (item) => String(item?.id ?? item?.slug ?? '');
 
@@ -40,30 +41,60 @@ const buildCommercePayload = (items, totalValue) => {
   };
 };
 
+const ensureMetaPixelScript = () => {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return;
+
+  if (!window.fbq) {
+    /* eslint-disable */
+    (function (f, b, e, v, n, t, s) {
+      if (f.fbq) return;
+      n = f.fbq = function () {
+        n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+      };
+      if (!f._fbq) f._fbq = n;
+      n.push = n;
+      n.loaded = !0;
+      n.version = '2.0';
+      n.queue = [];
+    })(window, document, 'script', FBEVENTS_SRC);
+    /* eslint-enable */
+  }
+
+  const hasScript = Boolean(
+    document.querySelector(`script[src*="fbevents.js"]`)
+  );
+
+  if (!hasScript) {
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = FBEVENTS_SRC;
+    const firstScript = document.getElementsByTagName('script')[0];
+    if (firstScript?.parentNode) {
+      firstScript.parentNode.insertBefore(script, firstScript);
+    } else {
+      document.head.appendChild(script);
+    }
+  }
+};
+
 export const initMetaPixel = () => {
-  if (!PIXEL_ID || typeof window === 'undefined' || window.fbq) return;
+  if (!PIXEL_IDS.length || typeof window === 'undefined') return;
 
-  /* eslint-disable */
-  (function (f, b, e, v, n, t, s) {
-    if (f.fbq) return;
-    n = f.fbq = function () {
-      n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
-    };
-    if (!f._fbq) f._fbq = n;
-    n.push = n;
-    n.loaded = !0;
-    n.version = '2.0';
-    n.queue = [];
-    t = b.createElement(e);
-    t.async = !0;
-    t.src = v;
-    s = b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t, s);
-  })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
-  /* eslint-enable */
+  ensureMetaPixelScript();
 
-  window.fbq('init', PIXEL_ID);
-  window.fbq('track', 'PageView');
+  const initialized = window.__metaPixelInitializedIds ??= new Set();
+  let hasNewPixel = false;
+
+  PIXEL_IDS.forEach((pixelId) => {
+    if (initialized.has(pixelId)) return;
+    window.fbq('init', pixelId);
+    initialized.add(pixelId);
+    hasNewPixel = true;
+  });
+
+  if (hasNewPixel) {
+    window.fbq('track', 'PageView');
+  }
 };
 
 export const trackMetaPageView = () => {
