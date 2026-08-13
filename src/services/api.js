@@ -1,5 +1,6 @@
 import productsData from './products';
 import { isSupabaseConfigured, supabaseRequest } from './supabaseRest';
+import { getEffectivePrice } from '../utils/pricing';
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -19,6 +20,7 @@ const mapProductRow = (row) => ({
   name: row.name,
   brand: row.brand || 'TAWY',
   price: Number(row.price || 0),
+  salePrice: row.sale_price != null ? Number(row.sale_price) : null,
   image: row.image_url,
   collection: row.collection,
   category: row.category,
@@ -30,6 +32,7 @@ const mapProductRow = (row) => ({
   description: row.description || '',
   sizeFit: row.size_fit || '',
   shipping: row.shipping || '',
+  sizeInputType: row.size_input_type || 'standard',
   bestSeller: row.best_seller,
   slug: row.slug,
   sort_order: row.sort_order,
@@ -59,10 +62,10 @@ const applyProductFilters = (items, filters = {}) => {
   if (filters.sort) {
     switch (filters.sort) {
       case 'price-low':
-        products.sort((a, b) => a.price - b.price);
+        products.sort((a, b) => getEffectivePrice(a) - getEffectivePrice(b));
         break;
       case 'price-high':
-        products.sort((a, b) => b.price - a.price);
+        products.sort((a, b) => getEffectivePrice(b) - getEffectivePrice(a));
         break;
       case 'name':
         products.sort((a, b) => a.name.localeCompare(b.name));
@@ -87,6 +90,7 @@ export const filterProducts = applyProductFilters;
 const normalizeSeedProduct = (product) => ({
   ...product,
   sort_order: product.sort_order ?? (product.id * 10),
+  sizeInputType: product.sizeInputType || 'standard',
 });
 
 const getSeedProducts = () => productsData.map(normalizeSeedProduct);

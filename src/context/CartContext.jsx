@@ -1,6 +1,8 @@
 import React, { useReducer, useEffect } from 'react';
 import { CartContext } from './CartContextValue';
 import { cartHasOnlyBag, getCartBagBlockReason, isBagProduct } from '../utils/bagProduct';
+import { getPriceDisplay } from '../utils/pricing';
+import { trackMetaAddToCart } from '../utils/metaPixel';
 
 const cartReducer = (state, action) => {
   switch (action.type) {
@@ -109,13 +111,16 @@ export const CartProvider = ({ children }) => {
   }, [state]);
 
   const addToCart = (product, size, quantity = 1, color = '') => {
+    const pricing = getPriceDisplay(product);
+
     dispatch({
       type: 'ADD_TO_CART',
       payload: {
         id: product.id,
         name: product.name,
         brand: product.brand,
-        price: product.price,
+        price: pricing.current,
+        originalPrice: pricing.onSale ? pricing.original : undefined,
         image: product.image,
         size,
         color,
@@ -123,6 +128,13 @@ export const CartProvider = ({ children }) => {
         slug: product.slug,
         collection: product.collection
       }
+    });
+
+    trackMetaAddToCart({
+      id: product.id,
+      name: product.name,
+      price: pricing.current,
+      quantity,
     });
   };
 

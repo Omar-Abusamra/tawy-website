@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContextValue';
 import { getCartBagBlockReason, isBagProduct } from '../utils/bagProduct';
+import ProductPrice from '../components/ProductPrice';
+import { formatPrice } from '../utils/pricing';
 import './Cart.css';
 
 const getCartItemKey = (item) => `${item.id}-${item.size}-${item.color || 'no-color'}`;
@@ -74,7 +76,7 @@ const Cart = () => {
                     <span>Size: {item.size}</span>
                     {item.color && <span>Color: {item.color}</span>}
                   </div>
-                  {item.price > 0 && <p className="cart-item-price">LE {item.price.toLocaleString()}</p>}
+                  <ProductPrice item={item} className="cart-item-price" />
                 </div>
 
                 <div className="cart-item-actions">
@@ -102,7 +104,7 @@ const Cart = () => {
 
               <div className="cart-item-total">
                 <p className={item.price > 0 ? '' : 'cart-item-total__placeholder'}>
-                  {item.price > 0 ? `LE ${(item.price * item.quantity).toLocaleString()}` : 'LE 0'}
+                  {item.price > 0 ? `LE ${formatPrice(item.price * item.quantity)}` : 'LE 0'}
                 </p>
                 <button
                   onClick={() => handleRemoveItem(item)}
@@ -124,7 +126,7 @@ const Cart = () => {
           <h3>Order Summary</h3>
           <div className="summary-row">
             <span>Subtotal ({cartItemCount} {cartItemCount === 1 ? 'item' : 'items'})</span>
-            <span>LE {getCartTotal().toLocaleString()}</span>
+            <span>LE {formatPrice(getCartTotal())}</span>
           </div>
           <div className="summary-row">
             <span>Shipping</span>
@@ -132,7 +134,7 @@ const Cart = () => {
           </div>
           <div className="summary-row total">
             <span>Total</span>
-            <span>LE {getCartTotal().toLocaleString()}</span>
+            <span>LE {formatPrice(getCartTotal())}</span>
           </div>
           
           {cartBagBlockReason && (

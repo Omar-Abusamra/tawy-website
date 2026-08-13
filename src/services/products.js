@@ -42,6 +42,7 @@ const products = [
     name: "Vintage T-Shirt",
     brand: "TAWY",
     price: 29.99,
+    salePrice: 19.99,
     image: "https://images.unsplash.com/photo-1581655353564-df123a1eb820?auto=format&fit=crop&w=800&q=80",
     collection: "summer25",
     category: "t-shirts",
@@ -64,6 +65,7 @@ const products = [
     name: "Cargo Jorts",
     brand: "TAWY",
     price: 59.99,
+    salePrice: 44.99,
     image: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=800&q=80",
     collection: "denim",
     category: "shorts",
@@ -107,6 +109,7 @@ const products = [
     name: "Graphic Tee",
     brand: "TAWY",
     price: 34.99,
+    salePrice: 24.99,
     image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=80",
     collection: "ss25",
     category: "t-shirts",
@@ -166,6 +169,28 @@ const products = [
     shipping: "Included with eligible orders. Returns accepted within 14 days.",
     bestSeller: false,
     slug: "bag"
+  },
+  {
+    id: 8,
+    name: "Draped Silhouette Twisted Front",
+    brand: "TAWY",
+    price: 120,
+    image: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=800&q=80",
+    collection: "summer25",
+    category: "dresses",
+    sizes: ["One Size"],
+    colors: ["Black", "Navy"],
+    colorImages: {
+      Black: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=800&q=80",
+      Navy: "https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?auto=format&fit=crop&w=800&q=80"
+    },
+    inStock: true,
+    description: "Draped silhouette with twisted front.",
+    sizeFit: "Made to order based on your waist measurement.",
+    shipping: "Made to order in one week. Not eligible for exchange or return.",
+    sizeInputType: "waist",
+    bestSeller: false,
+    slug: "draped-silhouette-twisted-front"
   }
 ];
 

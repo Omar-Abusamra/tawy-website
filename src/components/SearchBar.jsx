@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import ProductPrice from './ProductPrice';
 import './SearchBar.css';
 
 const SearchBar = ({ products = [], onSearch, isOpen = false, onClose }) => {
@@ -169,7 +170,7 @@ const SearchBar = ({ products = [], onSearch, isOpen = false, onClose }) => {
                 <div className="search-result-info">
                   <div className="search-result-name">{product.name}</div>
                   <div className="search-result-brand">{product.brand}</div>
-                    {product.price > 0 && <div className="search-result-price">LE {product.price}</div>}
+                  <ProductPrice product={product} className="search-result-price" />
                 </div>
               </Link>
             ))}

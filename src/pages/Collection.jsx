@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import './Collection.css';
 import { api, getCachedProducts } from '../services/api';
+import ProductPrice from '../components/ProductPrice';
+import { trackMetaViewCategory } from '../utils/metaPixel';
 
 const getFilters = (collectionSlug, searchQuery) => ({
   collection: collectionSlug || 'all',
@@ -57,6 +59,20 @@ const Collection = () => {
     };
   }, [collectionSlug, searchQuery]);
 
+  useEffect(() => {
+    if (loading || searchQuery) return;
+
+    const categoryName = collectionSlug
+      ? collectionSlug.replace(/-/g, ' ')
+      : 'The Collection';
+
+    trackMetaViewCategory({
+      name: categoryName,
+      slug: collectionSlug || 'all',
+      products,
+    });
+  }, [collectionSlug, searchQuery, products, loading]);
+
   const title = searchQuery
     ? `Search: ${searchQuery}`
     : collectionSlug
@@ -90,7 +106,7 @@ const Collection = () => {
 
               <div className="meta">
                 <span className="nm">{product.name}</span>
-                {product.price > 0 && <span className="pr">LE {product.price}</span>}
+                <ProductPrice product={product} className="pr" />
               </div>
             </Link>
           )) : (

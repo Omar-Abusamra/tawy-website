@@ -8,6 +8,7 @@ create table if not exists public.products (
   collection text not null,
   category text not null,
   price numeric(10, 2) not null default 0,
+  sale_price numeric(10, 2),
   image_url text not null,
   sizes text[] not null default '{}',
   colors text[] not null default '{}',
@@ -26,6 +27,12 @@ create table if not exists public.products (
 
 -- Migration for existing databases: add the per-color media gallery column.
 alter table public.products add column if not exists color_media jsonb not null default '{}';
+
+-- Migration for existing databases: add optional sale price column.
+alter table public.products add column if not exists sale_price numeric(10, 2);
+
+-- Migration for existing databases: optional custom size input type.
+alter table public.products add column if not exists size_input_type text not null default 'standard';
 
 create table if not exists public.orders (
   id uuid primary key default gen_random_uuid(),
@@ -85,7 +92,7 @@ to anon, authenticated
 with check (true);
 
 insert into public.products (
-  id, name, brand, slug, collection, category, price, image_url, sizes, colors,
+  id, name, brand, slug, collection, category, price, sale_price, image_url, sizes, colors,
   color_images, color_media, in_stock, description, size_fit, shipping, best_seller, status, sort_order
 ) values
 (
@@ -96,6 +103,7 @@ insert into public.products (
   'denim',
   'jackets',
   89.99,
+  null,
   'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=800&q=80',
   array['S', 'M', 'L', 'XL'],
   array['Blue', 'Black'],
@@ -117,6 +125,7 @@ insert into public.products (
   'summer25',
   't-shirts',
   29.99,
+  19.99,
   'https://images.unsplash.com/photo-1581655353564-df123a1eb820?auto=format&fit=crop&w=800&q=80',
   array['S', 'M', 'L'],
   array['White', 'Black', 'Gray'],
@@ -138,6 +147,7 @@ insert into public.products (
   'denim',
   'shorts',
   59.99,
+  44.99,
   'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=800&q=80',
   array['30', '32', '34', '36'],
   array['Blue', 'Black'],
@@ -159,6 +169,7 @@ insert into public.products (
   'summer25',
   'hoodies',
   79.99,
+  null,
   'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?auto=format&fit=crop&w=800&q=80',
   array['S', 'M', 'L', 'XL'],
   array['Gray', 'Black', 'Navy'],
@@ -180,6 +191,7 @@ insert into public.products (
   'ss25',
   't-shirts',
   34.99,
+  24.99,
   'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=80',
   array['S', 'M', 'L', 'XL'],
   array['White', 'Black'],
@@ -201,6 +213,7 @@ insert into public.products (
   'denim',
   'shirts',
   69.99,
+  null,
   'https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?auto=format&fit=crop&w=800&q=80',
   array['S', 'M', 'L'],
   array['Blue', 'Light Blue'],
@@ -222,6 +235,7 @@ insert into public.products (
   'accessories',
   'accessories',
   0,
+  null,
   'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=800&q=80',
   array['One Size'],
   array['Black', 'Blue', 'Green', 'Gold'],
@@ -242,6 +256,7 @@ on conflict (id) do update set
   collection = excluded.collection,
   category = excluded.category,
   price = excluded.price,
+  sale_price = excluded.sale_price,
   image_url = excluded.image_url,
   sizes = excluded.sizes,
   colors = excluded.colors,

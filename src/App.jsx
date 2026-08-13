@@ -15,6 +15,7 @@ import { AuthProvider } from './context/AuthContext';
 import AnimatedBackground from './components/AnimatedBackground';
 import LuxuryLoader from './components/LuxuryLoader';
 import ScrollToTop from './components/ScrollToTop';
+import MetaPixel from './components/MetaPixel';
 import { prefetchProducts } from './services/api';
 import './App.css';
 
@@ -40,6 +41,7 @@ function App() {
       <CartProvider>
         <Router>
           <ScrollToTop />
+          <MetaPixel />
           {showLoader && <LuxuryLoader onComplete={handleLoaderComplete} />}
           <AnimatedBackground />
           <Navbar />

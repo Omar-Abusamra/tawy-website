@@ -21,7 +21,7 @@ const sizeCharts = {
     hasInternationalSizes: false,
     measurements: ['Shoulder', 'Sleeve', 'Bust', 'Hip', 'Length'],
     sizes: {
-      S: { shoulder: '38', sleeve: '58', bust: '28', hip: '58', length: '104' },
+      S: { shoulder: '38', sleeve: '58', bust: '28', hip: '58', length: '140' },
       M: { shoulder: '40', sleeve: '59', bust: '60', hip: '60', length: '143' },
       L: { shoulder: '42', sleeve: '61', bust: '62', hip: '62', length: '145' },
     },

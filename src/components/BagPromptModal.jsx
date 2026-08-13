@@ -14,6 +14,28 @@ const getBagImage = (product, color) => (
   product?.colorImages?.[color] || product?.image || ''
 );
 
+const getBagColorImages = (product) => {
+  if (!product) return [];
+
+  const colors = product.colors?.length
+    ? product.colors
+    : Object.keys(product.colorImages || {});
+
+  return colors
+    .map((color) => ({
+      color,
+      src: getBagImage(product, color),
+    }))
+    .filter((entry) => entry.src);
+};
+
+const preloadImages = (urls) => {
+  urls.forEach((url) => {
+    const image = new Image();
+    image.src = url;
+  });
+};
+
 const BagPromptModal = ({ onClose, onSkip }) => {
   const { items, addToCart } = useCart();
   const [bagProduct, setBagProduct] = useState(null);
@@ -22,6 +44,11 @@ const BagPromptModal = ({ onClose, onSkip }) => {
 
   useEffect(() => {
     let isMounted = true;
+
+    const seedBag = findProductBySlug(seedProducts, 'bag', 'accessories');
+    if (seedBag) {
+      preloadImages(getBagColorImages(seedBag).map((entry) => entry.src));
+    }
 
     const loadBagProduct = async () => {
       try {
@@ -56,6 +83,11 @@ const BagPromptModal = ({ onClose, onSkip }) => {
 
     setSelectedColor(firstAllowed || bagProduct.colors[0]);
   }, [bagProduct, items, selectedColor]);
+
+  useEffect(() => {
+    if (!bagProduct) return;
+    preloadImages(getBagColorImages(bagProduct).map((entry) => entry.src));
+  }, [bagProduct]);
 
   const blockReason = selectedColor ? getBagOrderBlockReason(items, selectedColor) : '';
 
@@ -106,10 +138,16 @@ const BagPromptModal = ({ onClose, onSkip }) => {
 
         {bagProduct?.image && (
           <div className="bag-prompt__preview">
-            <img
-              src={getBagImage(bagProduct, selectedColor) || bagProduct.image}
-              alt={selectedColor ? `TAWY bag in ${selectedColor}` : 'TAWY bag'}
-            />
+            {getBagColorImages(bagProduct).map(({ color, src }) => (
+              <img
+                key={color}
+                src={src}
+                alt={selectedColor === color ? `TAWY bag in ${color}` : ''}
+                aria-hidden={selectedColor !== color}
+                className={`bag-prompt__preview-image ${selectedColor === color ? 'bag-prompt__preview-image--active' : ''}`}
+                decoding="async"
+              />
+            ))}
           </div>
         )}
 

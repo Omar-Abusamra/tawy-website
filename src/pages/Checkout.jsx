@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContextValue';
 import { submitCashOnDeliveryOrder } from '../services/orders';
@@ -8,6 +8,11 @@ import {
   getCartBagBlockReason,
   isBagProduct,
 } from '../utils/bagProduct';
+import { formatPrice } from '../utils/pricing';
+import {
+  trackMetaInitiateCheckout,
+  trackMetaPurchase,
+} from '../utils/metaPixel';
 import './Checkout.css';
 
 const initialCustomer = {
@@ -39,6 +44,7 @@ const Checkout = () => {
   const [status, setStatus] = useState('');
   const [orderReference, setOrderReference] = useState('');
   const [bagPromptSkipped, setBagPromptSkipped] = useState(false);
+  const checkoutTrackedRef = useRef(false);
 
   const total = getCartTotal();
   const itemCount = items.reduce((count, item) => count + item.quantity, 0);
@@ -50,6 +56,12 @@ const Checkout = () => {
     !bagPromptSkipped &&
     !orderReference
   );
+
+  useEffect(() => {
+    if (items.length === 0 || orderReference || checkoutTrackedRef.current) return;
+    checkoutTrackedRef.current = true;
+    trackMetaInitiateCheckout({ items, total });
+  }, [items, total, orderReference]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -87,6 +99,11 @@ const Checkout = () => {
         createdAt: Date.now(),
       };
 
+      trackMetaPurchase({
+        orderReference: result.orderReference,
+        items,
+        total,
+      });
       sessionStorage.setItem('latestOrderNotification', JSON.stringify(orderNotification));
       window.dispatchEvent(new CustomEvent('tawy:order-placed', { detail: orderNotification }));
       setOrderReference(result.orderReference);
@@ -218,13 +235,13 @@ const Checkout = () => {
                   <strong>{item.name}</strong>
                   <span>{item.quantity} x {item.size}{item.color ? ` / ${item.color}` : ''}</span>
                 </div>
-                {item.price > 0 && <em>LE {(item.price * item.quantity).toLocaleString()}</em>}
+                {item.price > 0 && <em>LE {formatPrice(item.price * item.quantity)}</em>}
               </div>
             ))}
           </div>
           <div className="checkout__total">
             <span>Total</span>
-            <strong>LE {total.toLocaleString()}</strong>
+            <strong>LE {formatPrice(total)}</strong>
           </div>
         </aside>
       </section>

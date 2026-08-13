@@ -6,6 +6,16 @@ import { useCart } from '../context/CartContextValue';
 import SizeGuide from '../components/SizeGuide';
 import { getBagOrderBlockReason, getCartBagBlockReason, isBagProduct } from '../utils/bagProduct';
 import { getColorSwatch } from '../utils/colorSwatch';
+import ProductPrice from '../components/ProductPrice';
+import {
+  canPurchaseProduct,
+  getProductOrderSize,
+  isValidWaistSize,
+  isWaistSizeProduct,
+  MADE_TO_ORDER_NOTICE_BODY,
+  MADE_TO_ORDER_NOTICE_TITLE,
+} from '../utils/madeToOrderProduct';
+import { trackMetaViewContent } from '../utils/metaPixel';
 import './ProductDetails.css';
 
 const TruckIcon = () => (
@@ -37,7 +47,7 @@ const Collapsible = ({ title, icon, children }) => {
         <ChevronIcon open={open} />
       </button>
       <div className={`product-detail__accordion-panel ${open ? 'product-detail__accordion-panel--open' : ''}`}>
-        <p>{children}</p>
+        {typeof children === 'string' ? <p>{children}</p> : children}
       </div>
     </div>
   );
@@ -115,6 +125,8 @@ const ProductDetails = () => {
   const [showAddedMessage, setShowAddedMessage] = useState(false);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
   const [bagNoticeMessage, setBagNoticeMessage] = useState('');
+  const [waistSize, setWaistSize] = useState('');
+  const [waistSizeError, setWaistSizeError] = useState('');
   const { addToCart, items } = useCart();
 
   useLayoutEffect(() => {
@@ -123,6 +135,8 @@ const ProductDetails = () => {
     setQuantity(1);
     setShowAddedMessage(false);
     setBagNoticeMessage('');
+    setWaistSize('');
+    setWaistSizeError('');
 
     if (nextProduct) {
       const selection = applyProductSelection(nextProduct);
@@ -190,6 +204,11 @@ const ProductDetails = () => {
 
   useEffect(() => {
     if (!product) return;
+    trackMetaViewContent(product);
+  }, [product?.id]);
+
+  useEffect(() => {
+    if (!product) return;
     getColorSlides(product, selectedColor).forEach((slide) => {
       if (slide.type === 'image' && slide.src) {
         const preloadImage = new Image();
@@ -199,8 +218,9 @@ const ProductDetails = () => {
   }, [product, selectedColor]);
 
   const handleAddToCart = () => {
-    if (!product || !selectedSize || (product.colors?.length && !selectedColor)) return;
+    if (!product || !canPurchaseProduct(product, selectedSize, selectedColor, waistSize)) return;
 
+    const orderSize = getProductOrderSize(product, selectedSize, waistSize);
     const orderQuantity = isBagProduct(product) ? 1 : quantity;
 
     if (isBagProduct(product)) {
@@ -211,15 +231,27 @@ const ProductDetails = () => {
       }
     }
 
-    addToCart({ ...product, image: getProductImage(product, selectedColor) }, selectedSize, orderQuantity, selectedColor);
+    if (isWaistSizeProduct(product) && !isValidWaistSize(waistSize)) {
+      setWaistSizeError('Enter a valid waist size above 10 cm.');
+      return;
+    }
+
+    addToCart(
+      { ...product, image: getProductImage(product, selectedColor) },
+      orderSize,
+      orderQuantity,
+      selectedColor
+    );
     setShowAddedMessage(true);
     setBagNoticeMessage('');
+    setWaistSizeError('');
     setTimeout(() => setShowAddedMessage(false), 3000);
   };
 
   const handleBuyNow = () => {
-    if (!product || !selectedSize || (product.colors?.length && !selectedColor)) return;
+    if (!product || !canPurchaseProduct(product, selectedSize, selectedColor, waistSize)) return;
 
+    const orderSize = getProductOrderSize(product, selectedSize, waistSize);
     const orderQuantity = isBagProduct(product) ? 1 : quantity;
 
     if (isBagProduct(product)) {
@@ -230,7 +262,17 @@ const ProductDetails = () => {
       }
     }
 
-    addToCart({ ...product, image: getProductImage(product, selectedColor) }, selectedSize, orderQuantity, selectedColor);
+    if (isWaistSizeProduct(product) && !isValidWaistSize(waistSize)) {
+      setWaistSizeError('Enter a valid waist size above 10 cm.');
+      return;
+    }
+
+    addToCart(
+      { ...product, image: getProductImage(product, selectedColor) },
+      orderSize,
+      orderQuantity,
+      selectedColor
+    );
     navigate('/cart');
   };
 
@@ -261,8 +303,9 @@ const ProductDetails = () => {
     if (!slides.length) return;
     setSlideIndex((slides.length + index) % slides.length);
   };
-  const canPurchase = selectedSize && (!productColors.length || selectedColor);
+  const canPurchase = canPurchaseProduct(product, selectedSize, selectedColor, waistSize);
   const isBag = isBagProduct(product);
+  const requiresWaistSize = isWaistSizeProduct(product);
   const cartBagBlockReason = isBag ? getCartBagBlockReason(items) : null;
   const displayBagNotice = bagNoticeMessage || cartBagBlockReason;
 
@@ -319,7 +362,7 @@ const ProductDetails = () => {
         <section className="product-detail__info" aria-labelledby="product-title">
           <p className="product-detail__eyebrow">{product.brand || 'TAWY'}</p>
           <h1 id="product-title">{product.name}</h1>
-          {product.price > 0 && <p className="product-detail__price">LE {product.price.toLocaleString()}</p>}
+          <ProductPrice product={product} className="product-detail__price" size="detail" />
           <p className="product-detail__note">Tax included. Shipping calculated at checkout.</p>
 
           <div className="product-detail__description">
@@ -354,15 +397,46 @@ const ProductDetails = () => {
 
           <div className="product-detail__field">
             <div className="product-detail__field-head">
-              <label htmlFor="size">Size</label>
-              <button type="button" onClick={() => setShowSizeGuide(true)}>
-                Size guide
-              </button>
+              <label htmlFor={requiresWaistSize ? 'waist-size' : 'size'}>
+                {requiresWaistSize ? 'Waist size' : 'Size'}
+              </label>
+              {!requiresWaistSize && (
+                <button type="button" onClick={() => setShowSizeGuide(true)}>
+                  Size guide
+                </button>
+              )}
             </div>
-            <select id="size" value={selectedSize} onChange={(event) => setSelectedSize(event.target.value)}>
-              <option value="">Select a size</option>
-              {product.sizes.map((size) => <option key={size} value={size}>{size}</option>)}
-            </select>
+            {requiresWaistSize ? (
+              <>
+                <input
+                  id="waist-size"
+                  type="number"
+                  min="11"
+                  max="150"
+                  step="1"
+                  inputMode="numeric"
+                  className="product-detail__input"
+                  placeholder="Enter your waist size in cm"
+                  value={waistSize}
+                  onChange={(event) => {
+                    setWaistSize(event.target.value);
+                    setWaistSizeError('');
+                  }}
+                  aria-invalid={Boolean(waistSizeError)}
+                  aria-describedby={waistSizeError ? 'waist-size-error' : undefined}
+                />
+                {waistSizeError && (
+                  <p id="waist-size-error" className="product-detail__field-error" role="alert">
+                    {waistSizeError}
+                  </p>
+                )}
+              </>
+            ) : (
+              <select id="size" value={selectedSize} onChange={(event) => setSelectedSize(event.target.value)}>
+                <option value="">Select a size</option>
+                {product.sizes.map((size) => <option key={size} value={size}>{size}</option>)}
+              </select>
+            )}
           </div>
 
           {!isBag && (
@@ -402,7 +476,13 @@ const ProductDetails = () => {
           </div>
 
           <div className="product-detail__accordions">
-            <Collapsible icon={<TruckIcon />} title="Shipping and Returns">{product.shipping}</Collapsible>
+            {requiresWaistSize ? (
+              <Collapsible icon={<TruckIcon />} title={MADE_TO_ORDER_NOTICE_TITLE}>
+                {MADE_TO_ORDER_NOTICE_BODY}
+              </Collapsible>
+            ) : (
+              <Collapsible icon={<TruckIcon />} title="Shipping and Returns">{product.shipping}</Collapsible>
+            )}
           </div>
         </section>
       </section>
